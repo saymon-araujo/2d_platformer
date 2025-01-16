@@ -1,6 +1,11 @@
 using System;
 using UnityEngine;
 
+public enum FacingDirection
+{
+    Right,
+    Left
+}
 public class Player : MonoBehaviour
 { 
     private Rigidbody2D _rb;
@@ -10,6 +15,8 @@ public class Player : MonoBehaviour
     [Header("Player Movement")]
     [SerializeField] private float moveSpeed = 5f;
     [SerializeField] private float jumpForce = 14f;
+    private bool _isFacingRight = true;
+    private FacingDirection _facingDirection = FacingDirection.Right;
     
     [Header("Collision Info")]
     [SerializeField] private float groundCheckDistance = .9f;
@@ -28,6 +35,7 @@ public class Player : MonoBehaviour
         
         HandleCollisions();
         HandleMovement();
+        HandleFlip();
         HandleJump();
         HandleAnimations();
     }
@@ -58,6 +66,22 @@ public class Player : MonoBehaviour
             
             // Better for precise jump, which is more used in platformers: 
             _rb.linearVelocity = new Vector2(_rb.linearVelocity.x, jumpForce);
+        }
+    }
+    
+    private void Flip()
+    {
+        transform.Rotate(0f, 180f, 0f);
+        _isFacingRight = !_isFacingRight;
+    }
+    
+    private void HandleFlip()
+    {
+        // If the player is moving right and not facing right or moving left and facing right
+        if (_xInput > 0 && !_isFacingRight || _xInput < 0 && _isFacingRight)
+        {
+            _facingDirection = _facingDirection == FacingDirection.Right ? FacingDirection.Left : FacingDirection.Right;
+            Flip();
         }
     }
 
