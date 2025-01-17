@@ -371,8 +371,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fd9703e9cdcf243a688710a855d55c58, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 5
+  moveSpeed: 6
   jumpForce: 14
+  doubleJumpForce: 11
   groundCheckDistance: 0.9
   groundLayer:
     serializedVersion: 2
@@ -427,7 +428,7 @@ Rigidbody2D:
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
   m_Mass: 1
-  m_LinearDamping: 0
+  m_LinearDamping: 1
   m_AngularDamping: 0.05
   m_GravityScale: 4.5
   m_Material: {fileID: 0}

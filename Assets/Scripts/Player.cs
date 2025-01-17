@@ -2,26 +2,30 @@ using System;
 using UnityEngine;
 
 public enum FacingDirection
-{
+    {
     Right,
     Left
-}
+    }
+
 public class Player : MonoBehaviour
-{ 
+{
     private Rigidbody2D _rb;
     private Animator _anim;
     private float _xInput;
-    
+
     [Header("Player Movement")]
-    [SerializeField] private float moveSpeed = 5f;
+    [SerializeField] private float moveSpeed = 6f;
     [SerializeField] private float jumpForce = 14f;
+    [SerializeField] private float doubleJumpForce = 11f;
+    private bool _canDoubleJump;
     private bool _isFacingRight = true;
     private FacingDirection _facingDirection = FacingDirection.Right;
-    
-    [Header("Collision Info")]
+
+    [Header("Collision Info")] 
     [SerializeField] private float groundCheckDistance = .9f;
     [SerializeField] private LayerMask groundLayer;
     private bool _isGrounded;
+    private bool _isAirborne;
 
     private void Awake()
     {
@@ -32,7 +36,7 @@ public class Player : MonoBehaviour
     private void Update()
     {
         _xInput = Input.GetAxisRaw("Horizontal");
-        
+
         HandleCollisions();
         HandleMovement();
         HandleFlip();
@@ -42,7 +46,7 @@ public class Player : MonoBehaviour
 
     private void HandleCollisions()
     {
-        _isGrounded = Physics2D.Raycast(transform.position, Vector2.down, groundCheckDistance,groundLayer);
+        _isGrounded = Physics2D.Raycast(transform.position, Vector2.down, groundCheckDistance, groundLayer);
     }
 
     private void HandleMovement()
@@ -52,29 +56,76 @@ public class Player : MonoBehaviour
 
     private void HandleAnimations()
     {
-        _anim.SetFloat("xVelocity", _rb.linearVelocity.x );
-        _anim.SetFloat("yVelocity", _rb.linearVelocity.y );
+        _anim.SetFloat("xVelocity", _rb.linearVelocity.x);
+        _anim.SetFloat("yVelocity", _rb.linearVelocity.y);
         _anim.SetBool("isGrounded", _isGrounded);
     }
 
     private void HandleJump()
     {
-        if(Input.GetKeyDown(KeyCode.Space) && _isGrounded)
+        UpdateAirborneStatus();
+
+        if (!Input.GetKeyDown(KeyCode.Space))
         {
-            // Better for realism jump:
-            // _rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
-            
-            // Better for precise jump, which is more used in platformers: 
-            _rb.linearVelocity = new Vector2(_rb.linearVelocity.x, jumpForce);
+            return;
+        }
+
+        if (_isGrounded)
+        {
+            Jump();
+        }
+
+        if (!_isGrounded && _canDoubleJump)
+        {
+            DoubleJump();
         }
     }
-    
+
+    private void DoubleJump()
+    {
+        _rb.linearVelocity = new Vector2(_rb.linearVelocity.x, doubleJumpForce);
+        _canDoubleJump = false;
+    }
+
+    private void Jump()
+    {
+        // Better for realism jump:
+        // _rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
+
+        // Better for precise jump, which is more used in platformers: 
+        _rb.linearVelocity = new Vector2(_rb.linearVelocity.x, jumpForce);
+    }
+
+    private void UpdateAirborneStatus()
+    {
+        if (_isAirborne && _isGrounded)
+        {
+            HandleLanding();
+        }
+
+        if (!_isAirborne && !_isGrounded)
+        {
+            BecomeAirborne();
+        }
+    }
+
+    private void BecomeAirborne()
+    {
+        _isAirborne = true;
+    }
+
+    private void HandleLanding()
+    {
+        _isAirborne = false;
+        _canDoubleJump = true;
+    }
+
     private void Flip()
     {
         transform.Rotate(0f, 180f, 0f);
         _isFacingRight = !_isFacingRight;
     }
-    
+
     private void HandleFlip()
     {
         // If the player is moving right and not facing right or moving left and facing right
