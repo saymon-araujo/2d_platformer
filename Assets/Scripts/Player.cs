@@ -10,16 +10,22 @@ public enum FacingDirection
 
 public class Player : MonoBehaviour
 {
+    #region Variables and Properties
     private Rigidbody2D _rb;
     private Animator _anim;
     private float _xInput;
     private float _yInput;
 
     [Header("Player Movement")]
+    [Tooltip("How fast the player moves horizontally.")]
     [SerializeField] private float moveSpeed = 6f;
+    [Tooltip("The force applied when the player jumps.")]
     [SerializeField] private float jumpForce = 14f;
+    [Tooltip("The force applied when the player performs a double jump.")]
     [SerializeField] private float doubleJumpForce = 11f;
+    [Tooltip("The time window to buffer jump inputs before landing.")]
     [SerializeField] private float bufferJumpWindow = 0.25f;
+    [Tooltip("The time window for allowing a coyote jump after leaving a platform.")]
     [SerializeField] private float coyoteJumpWindow = 0.25f;
     private float _timeWhenBufferJumpPressed = -1f;
     private float _timeWhenCoyoteJumpPressed = -1f;
@@ -27,25 +33,35 @@ public class Player : MonoBehaviour
     private bool _isFacingRight = true;
     private FacingDirection _facingDirection = FacingDirection.Right;
 
-    [Header("Collision Info")] 
+    [Header("Collision Info")]
+    [Tooltip("Layers considered as ground for collision detection.")]
     [SerializeField] private LayerMask groundLayer;
+    [Tooltip("Distance to check for ground below the player.")]
     [SerializeField] private float groundCheckDistance = .9f;
+    [Tooltip("Distance to check for walls in front of the player.")]
     [SerializeField] private float wallCheckDistance = .75f;
     private bool _isGrounded;
     private bool _isAirborne;
     private bool _isWallDetected;
 
     [Header("Wall Interactions")]
-    [SerializeField] private float baseWallSlideSpeed =  0.05f;
+    [Tooltip("Base speed for sliding down a wall.")]
+    [SerializeField] private float baseWallSlideSpeed = 0.05f;
+    [Tooltip("Increased speed when the player presses against the wall while sliding.")]
     [SerializeField] private float fasterWallSlideSpeed = 1f;
+    [Tooltip("Duration of the wall jump effect.")]
     [SerializeField] private float wallJumpDuration = .45f;
+    [Tooltip("Force applied when performing a wall jump (x: horizontal, y: vertical).")]
     [SerializeField] private Vector2 wallJumpForce = new Vector2(7f, 14f);
     private bool _isWallJumping;
 
     [Header("Knock Back")]
-    [SerializeField] private float knockBackDuration =  .65f;
+    [Tooltip("Duration of the knock back effect.")]
+    [SerializeField] private float knockBackDuration = .65f;
+    [Tooltip("Force applied when the player is knocked back (x: horizontal, y: vertical).")]
     [SerializeField] private Vector2 knockBackPower = new Vector2(5f, 7f);
     private bool _isKnocked;
+    #endregion
 
     private void Awake()
     {
@@ -69,12 +85,15 @@ public class Player : MonoBehaviour
         HandleAnimations();
     }
 
+    #region Input Handling
     private void HandleInput()
     {
         _xInput = Input.GetAxisRaw("Horizontal");
         _yInput = Input.GetAxisRaw("Vertical");
     }
+    #endregion
 
+    #region Wall Slide
     private void HandleWallSlide()
     {
         var canWallSlide = _isWallDetected && _rb.linearVelocity.y < 0;
@@ -89,7 +108,9 @@ public class Player : MonoBehaviour
 
         _rb.linearVelocity = new Vector2(0, _rb.linearVelocity.y * wallSlideSpeed);
     }
+    #endregion
 
+    #region Collision Handling
     private void HandleCollisions()
     {
         var direction = _isFacingRight ? Vector2.right : Vector2.left;
@@ -97,7 +118,9 @@ public class Player : MonoBehaviour
         _isGrounded = Physics2D.Raycast(transform.position, Vector2.down, groundCheckDistance, groundLayer);
         _isWallDetected = Physics2D.Raycast(transform.position, direction, wallCheckDistance, groundLayer);
     }
+    #endregion
 
+    #region Movement Handling
     private void HandleMovement()
     {
         if (_isWallJumping || _isKnocked) return;
@@ -110,7 +133,9 @@ public class Player : MonoBehaviour
 
         _rb.linearVelocity = new Vector2(_xInput * moveSpeed, _rb.linearVelocity.y);
     }
+    #endregion
 
+    #region Animation Handling
     private void HandleAnimations()
     {
         _anim.SetFloat("xVelocity", _rb.linearVelocity.x);
@@ -118,7 +143,9 @@ public class Player : MonoBehaviour
         _anim.SetBool("isGrounded", _isGrounded);
         _anim.SetBool("isWallDetected", _isWallDetected);
     }
+    #endregion
 
+    #region Jump Handling
     private void HandleJump()
     {
         UpdateAirborneStatus();
@@ -195,7 +222,9 @@ public class Player : MonoBehaviour
             Jump();
         }
     }
+    #endregion
 
+    #region Knock Back and Handling
     public void KnockBack()
     {
         if (_isKnocked) return;
@@ -214,14 +243,18 @@ public class Player : MonoBehaviour
         yield return new WaitForSeconds(knockBackDuration);
         _isKnocked = false;
     }
+    #endregion
 
+    #region Coroutines
     private IEnumerator WallJumpRoutine()
     {
         _isWallJumping = true;
         yield return new WaitForSeconds(wallJumpDuration);
         _isWallJumping = false;
     }
+    #endregion
 
+    #region Airborne and Landing
     private void UpdateAirborneStatus()
     {
         if (_isAirborne && _isGrounded)
@@ -264,7 +297,9 @@ public class Player : MonoBehaviour
 
         AttemptBufferJump();
     }
+    #endregion
 
+    #region Flip Handling
     private void Flip()
     {
         transform.Rotate(0f, 180f, 0f);
@@ -292,12 +327,5 @@ public class Player : MonoBehaviour
             }
         }
     }
-
-    private void OnDrawGizmos()
-    {
-        Gizmos.color = Color.red;
-        Gizmos.DrawLine(transform.position, new Vector2(transform.position.x, transform.position.y - groundCheckDistance));
-        Gizmos.DrawLine(transform.position, new Vector2(transform.position.x + wallCheckDistance, transform.position.y));
-        Gizmos.DrawLine(transform.position, new Vector2(transform.position.x - wallCheckDistance, transform.position.y));
-    }
+    #endregion
 }
