@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using UnityEngine;
 
 public enum FacingDirection
@@ -26,11 +27,16 @@ public class Player : MonoBehaviour
     [SerializeField] private LayerMask groundLayer;
     [SerializeField] private float groundCheckDistance = .9f;
     [SerializeField] private float wallCheckDistance = .75f;
-    [SerializeField] private float baseWallSlideSpeed =  0.05f;
-    [SerializeField] private float fasterWallSlideSpeed = 1f;
     private bool _isGrounded;
     private bool _isAirborne;
     private bool _isWallDetected;
+
+    [Header("Wall Interactions")]
+    [SerializeField] private float baseWallSlideSpeed =  0.05f;
+    [SerializeField] private float fasterWallSlideSpeed = 1f;
+    [SerializeField] private float wallJumpDuration = .45f;
+    [SerializeField] private Vector2 wallJumpForce = new Vector2(7f, 14f);
+    private bool _isWallJumping;
 
     private void Awake()
     {
@@ -80,8 +86,11 @@ public class Player : MonoBehaviour
 
     private void HandleMovement()
     {
+        
+        if (_isWallJumping) return;
+        
         // Allow movement if not on a wall or if attempting to move away from the wall
-        if (_isWallDetected && ((_isFacingRight && _xInput > 0) || (!_isFacingRight && _xInput < 0)))
+        if (_isWallDetected)
         {
             return; // Block movement into the wall
         }
@@ -110,8 +119,13 @@ public class Player : MonoBehaviour
         {
             Jump();
         }
+        
+        if (_isWallDetected && !_isGrounded)
+        {
+            WallJump();
+        }
 
-        if (!_isGrounded && _canDoubleJump)
+        if (_canDoubleJump && !_isGrounded && !_isWallDetected)
         {
             DoubleJump();
         }
@@ -120,6 +134,7 @@ public class Player : MonoBehaviour
     private void DoubleJump()
     {
         _rb.linearVelocity = new Vector2(_rb.linearVelocity.x, doubleJumpForce);
+        _isWallJumping = false;
         _canDoubleJump = false;
     }
 
@@ -130,6 +145,27 @@ public class Player : MonoBehaviour
 
         // Better for precise jump, which is more used in platformers: 
         _rb.linearVelocity = new Vector2(_rb.linearVelocity.x, jumpForce);
+    }
+
+    private void WallJump()
+    {
+        // If facing right, we want to jump left, so use -1; if facing left, we want to jump right, so use 1.
+        var horizontalDirection = _isFacingRight ? -1 : 1;
+
+        // Apply the wall jump force in the opposite horizontal direction of the wall
+        _rb.linearVelocity = new Vector2(wallJumpForce.x * horizontalDirection, wallJumpForce.y);
+        _canDoubleJump = true;
+        
+        Flip();
+        StopCoroutine(WallJumpRoutine());
+        StartCoroutine(WallJumpRoutine());
+    }
+
+    private IEnumerator WallJumpRoutine()
+    {
+        _isWallJumping = true;
+        yield return new WaitForSeconds(wallJumpDuration);
+        _isWallJumping = false;
     }
 
     private void UpdateAirborneStatus()

@@ -468,8 +468,8 @@ Transform:
   m_GameObject: {fileID: 697411200}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -5.49, y: -2.32, z: 0}
-  m_LocalScale: {x: 1.5658425, y: -3.89529, z: 1}
+  m_LocalPosition: {x: -1.76, y: -0.15, z: 0}
+  m_LocalScale: {x: 1.5658425, y: -5.885004, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -508,11 +508,15 @@ MonoBehaviour:
   moveSpeed: 6
   jumpForce: 14
   doubleJumpForce: 11
-  groundCheckDistance: 0.9
-  wallCheckDistance: 0.75
   groundLayer:
     serializedVersion: 2
     m_Bits: 8
+  groundCheckDistance: 0.9
+  wallCheckDistance: 0.75
+  baseWallSlideSpeed: 0.05
+  fasterWallSlideSpeed: 1
+  wallJumpDuration: 0.6
+  wallJumpForce: {x: 7, y: 14}
 --- !u!70 &969590936
 CapsuleCollider2D:
   m_ObjectHideFlags: 0
@@ -831,8 +835,8 @@ Transform:
   m_GameObject: {fileID: 1545295899}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 5.25, y: -1.9028, z: 0}
-  m_LocalScale: {x: 1.5658425, y: -3.89529, z: 1}
+  m_LocalPosition: {x: 4.05, y: 0.02, z: 0}
+  m_LocalScale: {x: 1.5658425, y: -7.522584, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
