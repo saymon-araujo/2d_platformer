@@ -19,6 +19,8 @@ public class Player : MonoBehaviour
     [SerializeField] private float moveSpeed = 6f;
     [SerializeField] private float jumpForce = 14f;
     [SerializeField] private float doubleJumpForce = 11f;
+    [SerializeField] private float bufferJumpWindow = 0.25f;
+    private float _timeWhenBufferJumpPressed = -1f;
     private bool _canDoubleJump;
     private bool _isFacingRight = true;
     private FacingDirection _facingDirection = FacingDirection.Right;
@@ -124,6 +126,8 @@ public class Player : MonoBehaviour
         {
             return;
         }
+        
+        RequestBufferJump();
 
         if (_isGrounded)
         {
@@ -169,6 +173,22 @@ public class Player : MonoBehaviour
         Flip();
         StopCoroutine(WallJumpRoutine());
         StartCoroutine(WallJumpRoutine());
+    }
+
+    private void RequestBufferJump()
+    {
+        if (_isAirborne)
+        {
+            _timeWhenBufferJumpPressed = Time.time;
+        }
+    }
+
+    private void AttemptBufferJump()
+    {
+        if (Time.time < _timeWhenBufferJumpPressed + bufferJumpWindow)
+        {
+            Jump();
+        }
     }
 
     public void KnockBack()
@@ -220,6 +240,8 @@ public class Player : MonoBehaviour
     {
         _isAirborne = false;
         _canDoubleJump = true;
+        
+        AttemptBufferJump();
     }
 
     private void Flip()
