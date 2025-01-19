@@ -38,6 +38,11 @@ public class Player : MonoBehaviour
     [SerializeField] private Vector2 wallJumpForce = new Vector2(7f, 14f);
     private bool _isWallJumping;
 
+    [Header("Knock Back")]
+    [SerializeField] private float knockBackDuration =  .65f;
+    [SerializeField] private Vector2 knockBackPower = new Vector2(5f, 7f);
+    private bool _isKnocked;
+
     private void Awake()
     {
         _rb = GetComponent<Rigidbody2D>();
@@ -46,6 +51,12 @@ public class Player : MonoBehaviour
 
     private void Update()
     {
+
+        if (Input.GetKeyDown(KeyCode.K))
+        {
+            KnockBack();
+        }
+        
         HandleInput();
         HandleCollisions();
         HandleMovement();
@@ -86,8 +97,7 @@ public class Player : MonoBehaviour
 
     private void HandleMovement()
     {
-        
-        if (_isWallJumping) return;
+        if (_isWallJumping || _isKnocked) return;
         
         // Allow movement if not on a wall or if attempting to move away from the wall
         if (_isWallDetected)
@@ -160,6 +170,26 @@ public class Player : MonoBehaviour
         StopCoroutine(WallJumpRoutine());
         StartCoroutine(WallJumpRoutine());
     }
+
+    public void KnockBack()
+    {
+
+        if (_isKnocked) return;
+        
+        _anim.SetTrigger("KnockBack");
+        StartCoroutine(KnockBackRoutine());
+        
+        var horizontalDirection = _isFacingRight ? -1 : 1;
+        
+        _rb.linearVelocity = new Vector2(knockBackPower.x * horizontalDirection, knockBackPower.y);
+    }
+
+    private IEnumerator KnockBackRoutine()
+    {
+        _isKnocked = true;
+        yield return new WaitForSeconds(knockBackDuration);
+        _isKnocked = false;
+    }   
 
     private IEnumerator WallJumpRoutine()
     {
