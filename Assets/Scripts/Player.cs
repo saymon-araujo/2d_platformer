@@ -20,7 +20,9 @@ public class Player : MonoBehaviour
     [SerializeField] private float jumpForce = 14f;
     [SerializeField] private float doubleJumpForce = 11f;
     [SerializeField] private float bufferJumpWindow = 0.25f;
+    [SerializeField] private float coyoteJumpWindow = 0.25f;
     private float _timeWhenBufferJumpPressed = -1f;
+    private float _timeWhenCoyoteJumpPressed = -1f;
     private bool _canDoubleJump;
     private bool _isFacingRight = true;
     private FacingDirection _facingDirection = FacingDirection.Right;
@@ -53,12 +55,11 @@ public class Player : MonoBehaviour
 
     private void Update()
     {
-
         if (Input.GetKeyDown(KeyCode.K))
         {
             KnockBack();
         }
-        
+
         HandleInput();
         HandleCollisions();
         HandleMovement();
@@ -91,7 +92,7 @@ public class Player : MonoBehaviour
 
     private void HandleCollisions()
     {
-        Vector2 direction = _isFacingRight ? Vector2.right : Vector2.left;
+        var direction = _isFacingRight ? Vector2.right : Vector2.left;
 
         _isGrounded = Physics2D.Raycast(transform.position, Vector2.down, groundCheckDistance, groundLayer);
         _isWallDetected = Physics2D.Raycast(transform.position, direction, wallCheckDistance, groundLayer);
@@ -100,7 +101,7 @@ public class Player : MonoBehaviour
     private void HandleMovement()
     {
         if (_isWallJumping || _isKnocked) return;
-        
+
         // Allow movement if not on a wall or if attempting to move away from the wall
         if (_isWallDetected)
         {
@@ -126,14 +127,16 @@ public class Player : MonoBehaviour
         {
             return;
         }
-        
+
         RequestBufferJump();
 
-        if (_isGrounded)
+        var isCoyoteJumpAvailable = Time.time < _timeWhenCoyoteJumpPressed + coyoteJumpWindow;
+
+        if (_isGrounded || isCoyoteJumpAvailable)
         {
             Jump();
         }
-        
+
         if (_isWallDetected && !_isGrounded)
         {
             WallJump();
@@ -143,6 +146,8 @@ public class Player : MonoBehaviour
         {
             DoubleJump();
         }
+
+        CancelCoyoteJump();
     }
 
     private void DoubleJump()
@@ -169,7 +174,7 @@ public class Player : MonoBehaviour
         // Apply the wall jump force in the opposite horizontal direction of the wall
         _rb.linearVelocity = new Vector2(wallJumpForce.x * horizontalDirection, wallJumpForce.y);
         _canDoubleJump = true;
-        
+
         Flip();
         StopCoroutine(WallJumpRoutine());
         StartCoroutine(WallJumpRoutine());
@@ -193,14 +198,13 @@ public class Player : MonoBehaviour
 
     public void KnockBack()
     {
-
         if (_isKnocked) return;
-        
+
         _anim.SetTrigger("KnockBack");
         StartCoroutine(KnockBackRoutine());
-        
+
         var horizontalDirection = _isFacingRight ? -1 : 1;
-        
+
         _rb.linearVelocity = new Vector2(knockBackPower.x * horizontalDirection, knockBackPower.y);
     }
 
@@ -209,7 +213,7 @@ public class Player : MonoBehaviour
         _isKnocked = true;
         yield return new WaitForSeconds(knockBackDuration);
         _isKnocked = false;
-    }   
+    }
 
     private IEnumerator WallJumpRoutine()
     {
@@ -234,13 +238,30 @@ public class Player : MonoBehaviour
     private void BecomeAirborne()
     {
         _isAirborne = true;
+
+        var isFalling = _rb.linearVelocity.y < 0;
+
+        if (isFalling)
+        {
+            ActivateCoyoteJump();
+        }
+    }
+
+    private void ActivateCoyoteJump()
+    {
+        _timeWhenCoyoteJumpPressed = Time.time;
+    }
+
+    private void CancelCoyoteJump()
+    {
+        _timeWhenCoyoteJumpPressed = -Time.time;
     }
 
     private void HandleLanding()
     {
         _isAirborne = false;
         _canDoubleJump = true;
-        
+
         AttemptBufferJump();
     }
 
