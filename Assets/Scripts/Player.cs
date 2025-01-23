@@ -67,6 +67,7 @@ public class Player : MonoBehaviour
     {
         _rb = GetComponent<Rigidbody2D>();
         _anim = GetComponentInChildren<Animator>();
+        
     }
 
     private void Update()
