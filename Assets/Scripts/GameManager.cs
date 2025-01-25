@@ -2,9 +2,9 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
     {
-    
     public static GameManager Instance;
     public Player Player { get; private set; }
+    public int fruitsCollected;
 
     private void Awake()
     {
@@ -16,6 +16,11 @@ public class GameManager : MonoBehaviour
         {
             Destroy(gameObject);
         }
+    }
+
+    public void AddFruit()
+    {
+        fruitsCollected++;
     }
     
     }
