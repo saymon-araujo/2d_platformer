@@ -61,7 +61,11 @@ public class Player : MonoBehaviour
     [Tooltip("Force applied when the player is knocked back (x: horizontal, y: vertical).")]
     [SerializeField] private Vector2 knockBackPower = new Vector2(5f, 7f);
     private bool _isKnocked;
+
+    [Header("VFX")]
+    [SerializeField] private GameObject deathVFX;
     #endregion
+
 
     private void Awake()
     {
@@ -244,6 +248,13 @@ public class Player : MonoBehaviour
         yield return new WaitForSeconds(knockBackDuration);
         _isKnocked = false;
     }
+
+    public void Die()
+    {
+        Instantiate(deathVFX, transform.position, Quaternion.identity);
+        Destroy(gameObject);
+    }
+
     #endregion
 
     #region Coroutines

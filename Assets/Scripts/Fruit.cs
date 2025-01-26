@@ -53,7 +53,7 @@ public class Fruit : MonoBehaviour
 
             var newVFX = Instantiate(pickupVFX, transform.position, Quaternion.identity);
             
-            Destroy(newVFX, .5f);
+            Destroy(newVFX, 1f);
             
         }
     }
