@@ -192,3 +192,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e8c5e2a5681ba48c784a5603395f72a1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  fruitType: 0
+  pickupVFX: {fileID: 5677617205909553607, guid: 09f174f27f3b64aa9abed6e984933459, type: 3}

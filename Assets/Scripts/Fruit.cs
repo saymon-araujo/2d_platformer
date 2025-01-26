@@ -9,6 +9,7 @@ public class Fruit : MonoBehaviour
 {
 
     [SerializeField] private FruitType fruitType;
+    [SerializeField] private GameObject pickupVFX;
     private GameManager _gameManager;
     private Animator _anim;
 
@@ -49,6 +50,11 @@ public class Fruit : MonoBehaviour
         {
             _gameManager.AddFruit();
             Destroy(gameObject);
+
+            var newVFX = Instantiate(pickupVFX, transform.position, Quaternion.identity);
+            
+            Destroy(newVFX, .5f);
+            
         }
     }
     }
