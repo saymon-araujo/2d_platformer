@@ -4,6 +4,9 @@ public class GameManager : MonoBehaviour
     {
     public static GameManager Instance;
     public Player Player { get; private set; }
+    
+    [Header("Fruit Settings")]
+    public bool fruitsHaveRandomLook; 
     public int fruitsCollected;
 
     private void Awake()
@@ -22,5 +25,9 @@ public class GameManager : MonoBehaviour
     {
         fruitsCollected++;
     }
-    
+
+    public bool FruitsHaveRandomLook()
+    {
+        return fruitsHaveRandomLook;
+    }
     }
