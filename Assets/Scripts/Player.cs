@@ -15,6 +15,8 @@ public class Player : MonoBehaviour
     private Animator _anim;
     private float _xInput;
     private float _yInput;
+    private CapsuleCollider2D _collider;
+    private float _defaultGravityScale;
 
     [Header("Player Movement")]
     [Tooltip("How fast the player moves horizontally.")]
@@ -31,6 +33,7 @@ public class Player : MonoBehaviour
     private float _timeWhenCoyoteJumpPressed = -1f;
     private bool _canDoubleJump;
     private bool _isFacingRight = true;
+    private bool _canBeControlled = false;
     private FacingDirection _facingDirection = FacingDirection.Right;
 
     [Header("Collision Info")]
@@ -70,8 +73,14 @@ public class Player : MonoBehaviour
     private void Awake()
     {
         _rb = GetComponent<Rigidbody2D>();
+        _collider = GetComponent<CapsuleCollider2D>();
         _anim = GetComponentInChildren<Animator>();
-        
+    }
+
+    private void Start()
+    {
+        _defaultGravityScale = _rb.gravityScale;
+        RespawnFinished(false);
     }
 
     private void Update()
@@ -88,6 +97,22 @@ public class Player : MonoBehaviour
         HandleJump();
         HandleWallSlide();
         HandleAnimations();
+    }
+
+    public void RespawnFinished(bool finished)
+    {
+        if (finished)
+        {
+            _rb.gravityScale = _defaultGravityScale;
+            _canBeControlled = true;
+            _collider.enabled = true;
+        }
+        else
+        {
+            _rb.gravityScale = 0;
+            _canBeControlled = false;
+            _collider.enabled = false;
+        }
     }
 
     #region Input Handling
@@ -128,7 +153,7 @@ public class Player : MonoBehaviour
     #region Movement Handling
     private void HandleMovement()
     {
-        if (_isWallJumping || _isKnocked) return;
+        if (_isWallJumping || _isKnocked || !_canBeControlled) return;
 
         // Allow movement if not on a wall or if attempting to move away from the wall
         if (_isWallDetected)
