@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -5,7 +6,6 @@ using UnityEngine;
 public class GameManager : MonoBehaviour
     {
     public static GameManager Instance;
-    
     
     [Header("Player Settings")]
     [SerializeField] private GameObject playerPrefab;
@@ -16,7 +16,7 @@ public class GameManager : MonoBehaviour
     [Header("Fruit Settings")]
     public bool fruitsHaveRandomLook; 
     public int fruitsCollected;
-
+    public int totalFruitsAmount;
     private void Awake()
     {
         if (Instance == null)
@@ -27,6 +27,18 @@ public class GameManager : MonoBehaviour
         {
             Destroy(gameObject);
         }
+    }
+
+
+    private void Start()
+    {
+        GetTotalAmountOfFruits();
+    }
+
+    private void GetTotalAmountOfFruits()
+    {
+        Fruit[] allFruits = FindObjectsByType<Fruit>(FindObjectsSortMode.None);
+        totalFruitsAmount = allFruits.Length;
     }
 
     public void AddFruit()
@@ -46,6 +58,11 @@ public class GameManager : MonoBehaviour
         yield return new WaitForSeconds(respawnDelay);
         
         Player = Instantiate(playerPrefab, respawnPoint.position, Quaternion.identity).GetComponent<Player>();
+    }
+
+    public void UpdateRespawnPosition(Transform newPosition)
+    {
+        respawnPoint.position = newPosition.position;
     }
 
     }
